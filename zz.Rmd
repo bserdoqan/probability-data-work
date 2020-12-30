@@ -1,0 +1,81 @@
+---
+title: "Exploring the BRFSS data"
+author: "Bugra Sebati Erdogan"
+date: "27 12 2020"
+output: 
+  html_document: 
+    highlight: pygments
+    theme: spacelab
+    fig_height: 4
+---
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+### Load data
+```{r load-data}
+load("brfss2013.RData")
+```
+
+## Part 1: Data
+
+Generabizability: Data can only be generalized to those 18 years of age and older who are members of a household with a telephone. That is, it cannot be generalized to all locations, as access to telephones isn’t equal worldwide.
+
+Causality: It’s not possible to establish a causal relationship, since the data are claims of an observation, not an experiment. So the most we can do is find some kind of correlation.
+
+## Part 2: Research questions
+
+**Research question 1:** Is there any correlation between Number Of Children In Household (children) and how long you sleep (sleptim1)? How does this vary by gender (sex)?
+
+**Research question 2:** Does How Many Hours Per Week Did You Work (scntlwk1) affect How Much Time Do You Sleep (sleptim1)? How this affect Difficulty Concentrating Or Remembering (decide)?
+
+**Research question 3:** Is there any relation between How Many Days Depressed In Past 30 Days (qlmentl2) and Avg Alcoholic Drinks Per Day In Past 30 (avedrnk2), based on how many times Exercised In Past 30 Days (exerany2)?
+
+
+
+## Part 3: Exploratory data analysis
+
+**Research quesion 1:**
+
+```{r}
+question_1 <- select(brfss2013, children, sleptim1, sex) %>% filter(children != "NA") %>% filter(sleptim1 != "NA") %>% filter(sex != "NA")
+summary(question_1)
+```
+```{r}
+plot_1 <- ggplot(question_1, aes(sleptim1, children))
+plot_1 + geom_point(aes(colour = sex)) + facet_grid(.~sex) + xlab("Number Of Children In Household") + ylab("How Much Time Do You Sleep")
+```
+Apparently there is a negative correlation: the more children present in the house, the less time the person sleeps. There is no big difference between genres.
+
+
+**Research quesion 2:**
+
+```{r}
+question_2 <- select(brfss2013, scntlwk1, sleptim1, decide) %>% filter(scntlwk1 != "NA") %>% filter(sleptim1 != "NA") %>% filter(decide != "NA")
+summary(question_2)
+```
+```{r}
+plot_2 <- ggplot(question_2, aes(scntlwk1, sleptim1))
+plot_2 + geom_point(aes(colour = decide)) + facet_grid(.~decide) + xlab("How Many Hours Per Week Did You Work") + ylab("How Much Time Do You Sleep")
+```
+It seems that there is no difference between those with difficulty remembering or concentrating.The format of the graphics is very similar.
+
+
+**Research quesion 3:**
+
+```{r}
+question_3 <- select(brfss2013, qlmentl2, avedrnk2, exerany2) %>% filter(qlmentl2 != "NA") %>% filter(avedrnk2 != "NA") %>% filter(exerany2 != "NA")
+summary(question_3)
+```
+
+```{r}
+plot_3 <- ggplot(question_3, aes(qlmentl2, avedrnk2))
+plot_3 + geom_point(aes(colour = exerany2)) + facet_grid(.~exerany2) + xlab("How Many Days Depressed In Past 30 Days") + ylab("Avg Alcoholic Drinks Per Day In Past 30")
+```
+According to the chart, people who have not exercised tend to have a little more days feeling depressed. In addition, there is also a slight correlation between drinking and feeling depressed: people who drink more tend to have less depressed days.
